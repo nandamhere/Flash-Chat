@@ -135,27 +135,28 @@ class ChatViewController: UIViewController, UITableViewDelegate, UITableViewData
     //MARK: - Send & Recieve from Firebase
     
     
-    
+   //TODO: Send the message to Firebase and save it in our database
     
     
     @IBAction func sendPressed(_ sender: AnyObject) {
         
-        
-        //TODO: Send the message to Firebase and save it in our database
-        
-        
+        let messageDB = Database.database().reference().child("Messages")
+        let messageDictionary = ["Sender" : Auth.auth().currentUser?.email , "Message" : messageTextfield.text!]
+        messageDB.childByAutoId().setValue(messageDictionary){
+            (error, reference) in
+        }
     }
     
     //TODO: Create the retrieveMessages method here:
     
     
+    
 
     
-    
+    //TODO: Log out the user and send them back to WelcomeViewController
     
     @IBAction func logOutPressed(_ sender: AnyObject) {
         
-        //TODO: Log out the user and send them back to WelcomeViewController
         do {
             
             try Auth.auth().signOut()
