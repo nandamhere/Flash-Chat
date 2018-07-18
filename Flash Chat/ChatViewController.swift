@@ -68,6 +68,11 @@ class ChatViewController: UIViewController, UITableViewDelegate, UITableViewData
         cell.messageBody.text = messageArray[indexPath.row].text
         cell.senderUsername.text = messageArray[indexPath.row].sender
         cell.avatarImageView.image = #imageLiteral(resourceName: "image")
+        if cell.senderUsername.text == Auth.auth().currentUser?.email {
+            cell.messageBackground.backgroundColor = UIColor.darkGray
+        } else {
+            cell.messageBackground.backgroundColor = UIColor.blue
+        }
         return cell
         
     }
