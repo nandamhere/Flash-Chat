@@ -9,12 +9,15 @@
 import UIKit
 import Firebase
 
-class ChatViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate{
+class ChatViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate {
     
     
   
     
     // Declare instance variables here
+    
+     let messageDB = Database.database().reference().child("Messages")
+    var messageArray : [Message] = [Message]()
 
     
     // We've pre-linked the IBOutlets
@@ -50,32 +53,29 @@ class ChatViewController: UIViewController, UITableViewDelegate, UITableViewData
 
         configureTableView()
         
+        retriveMessages()
+        
         
     }
 
     ///////////////////////////////////////////
     
     //MARK: - TableView DataSource Methods
-    
-    
-    
     //TODO: cellForRowAtIndexPath :
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "customMessageCell", for: indexPath) as! CustomMessageCell
-        let messageArray = ["first message", "second message", "third message"]
-        cell.messageBody.text = messageArray[indexPath.row]
+        cell.messageBody.text = messageArray[indexPath.row].text
+        cell.senderUsername.text = messageArray[indexPath.row].sender
+        cell.avatarImageView.image = #imageLiteral(resourceName: "image")
         return cell
         
     }
     
-    
-    
-    
     //TODO: Declare numberOfRowsInSection here:
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 3
+        return messageArray.count
     }
     
     
@@ -101,9 +101,6 @@ class ChatViewController: UIViewController, UITableViewDelegate, UITableViewData
     ///////////////////////////////////////////
     
     //MARK:- TextField Delegate Methods
-    
-    
-
     
     //TODO: Declare textFieldDidBeginEditing here:
     
@@ -140,14 +137,41 @@ class ChatViewController: UIViewController, UITableViewDelegate, UITableViewData
     
     @IBAction func sendPressed(_ sender: AnyObject) {
         
-        let messageDB = Database.database().reference().child("Messages")
+      //  let messageDB = Database.database().reference().child("Messages")
+        messageTextfield.endEditing(true)
+        messageTextfield.isEnabled = false
+        sendButton.isEnabled = false
         let messageDictionary = ["Sender" : Auth.auth().currentUser?.email , "Message" : messageTextfield.text!]
         messageDB.childByAutoId().setValue(messageDictionary){
             (error, reference) in
+            if error != nil {
+                print(error!)
+                
+            }else {
+                print("message saved successfully")
+                self.messageTextfield.isEnabled = true
+                self.sendButton.isEnabled = true
+                self.messageTextfield.text = " "
+            }
         }
+
     }
     
     //TODO: Create the retrieveMessages method here:
+    
+    func retriveMessages() {
+        messageDB.observe(.childAdded) { (snapshot) in
+            
+            let snapshotValue = snapshot.value as! Dictionary<String, String>
+            let message = Message()
+            message.text = snapshotValue["Message"]!
+            message.sender = snapshotValue["Sender"]!
+            self.messageArray.append(message)
+            self.configureTableView()
+            self.messageTableView.reloadData()
+            
+        }
+    }
     
     
     
